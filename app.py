@@ -15,5 +15,5 @@ async def on_ready():
     print('We have logged in ad {0.user}'.format(client))
 
 
-TOKEN = "OTUzMDk3OTg5MDE3MTk0NTI2.Yi_nrA.J3hba2z1YnHPomWRMNnSoTTRAfc"
+TOKEN = "OTUzMDk3OTg5MDE3MTk0NTI2.Yi_nrA.sjzUtm1Y3bytpC-AHoD-y8cKtB8"
 client.run(TOKEN)

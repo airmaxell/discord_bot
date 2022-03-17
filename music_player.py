@@ -365,14 +365,19 @@ class Music(commands.Cog):
             f_name = f"tts/{ctx.message.guild}.mp3"
             myobj.save(f_name)
             ### SPEEDUP
-            # sound = AudioSegment.from_file(f_name)
-            # fast_sound = self.speed_change(sound, 1.2)
-            # fast_sound.export(f_name, format = 'mp3')
+            sound = AudioSegment.from_file(f_name)
+            fast_sound = self.speed_change(sound, 1.2)
+            fast_sound.export(f_name, format = 'mp3')
             await player.play_static(FFmpegOpusAudio(f_name, bitrate=256))
         else:
             myobj = gTTS(text=text_to_speech, lang='sr', slow=False)
             f_name = f"tts/{ctx.message.guild}.mp3"
             myobj.save(f_name)
+            
+            ### SPEEDUP
+            sound = AudioSegment.from_file(f_name)
+            fast_sound = self.speed_change(sound, 1.1)
+            fast_sound.export(f_name, format = 'mp3')
             await player.play_static(FFmpegPCMAudio(f_name))
 
     @commands.command(name='pause', description="pauses music")
@@ -596,7 +601,7 @@ class Music(commands.Cog):
         try:
             if os.path.exists(f_name):        
                 with open(f_name, "r") as f:
-                    reader = csv.reader(f)
+                    reader = csv.reader(f,delimiter='-')
                     forice = list(reader)
                     message = forice[random.randint(0,len(forice) - 1)][0]
         
