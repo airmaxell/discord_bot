@@ -17,6 +17,7 @@ from gtts import gTTS
 from errors import *
 from pydub import AudioSegment
 import csv
+import json
 
 ffmpegopts = {
     'before_options': '-nostdin',
@@ -260,13 +261,14 @@ class Music(commands.Cog):
             player = self.get_player_without_context(self.bot, member.guild, after.channel, this)
             welcome_text = self.generate_welcome_message(member.display_name, member.guild)
             myobj = gTTS(text=welcome_text, lang='sr', slow=False)
-            f_name = f"tts/{member.guild}.mp3"
+            # f_name = f"tts/{member.guild}.mp3"
+            f_name = os.path.join("tts", str(member.guild) + ".mp3")
             myobj.save(f_name)
             await player.play_static(FFmpegOpusAudio(f_name, bitrate=256))
+            # await member.edit(nick='bot')
             return
         if not before.channel is None and not after.channel is None:
             if before.channel.id == after.channel.id:
-                print("ISTO")
                 return
 
     @commands.command(name='join', aliases=['connect', 'j'], description="connects to voice")
@@ -362,22 +364,24 @@ class Music(commands.Cog):
         
         elif text_to_speech == "lol":
             myobj = gTTS(text="lolovi dronovi speed bollovi", lang='sr', slow=False)
-            f_name = f"tts/{ctx.message.guild}.mp3"
+            # f_name = f"tts/{ctx.message.guild}.mp3"
+            f_name = os.path.join("tts", str(ctx.message.guild) + ".mp3")
             myobj.save(f_name)
             ### SPEEDUP
-            sound = AudioSegment.from_file(f_name)
-            fast_sound = self.speed_change(sound, 1.2)
-            fast_sound.export(f_name, format = 'mp3')
+            # sound = AudioSegment.from_file(f_name)
+            # fast_sound = self.speed_change(sound, 1.2)
+            # fast_sound.export(f_name, format = 'mp3')
             await player.play_static(FFmpegOpusAudio(f_name, bitrate=256))
         else:
             myobj = gTTS(text=text_to_speech, lang='sr', slow=False)
-            f_name = f"tts/{ctx.message.guild}.mp3"
+            # f_name = f"tts/{ctx.message.guild}.mp3"
+            f_name = os.path.join("tts", str(ctx.message.guild) + ".mp3")
             myobj.save(f_name)
             
             ### SPEEDUP
-            sound = AudioSegment.from_file(f_name)
-            fast_sound = self.speed_change(sound, 1.1)
-            fast_sound.export(f_name, format = 'mp3')
+            # sound = AudioSegment.from_file(f_name)
+            # fast_sound = self.speed_change(sound, 1.1)
+            # fast_sound.export(f_name, format = 'mp3')
             await player.play_static(FFmpegPCMAudio(f_name))
 
     @commands.command(name='pause', description="pauses music")
@@ -396,15 +400,45 @@ class Music(commands.Cog):
 
     @commands.command(name="add_forica", aliases=['af', 'fora'], description="Add forica to queue")
     async def add_forica(self, ctx, *, new_forica: str):
-        f_name = f"forice/{ctx.message.guild}.csv"
+        # f_name = f"forice/{ctx.message.guild}.csv"
+        f_name = os.path.join("forice", str(ctx.message.guild) + ".csv")
         os.makedirs(os.path.dirname(f_name), exist_ok=True)
         
         if not os.path.exists(f_name):        
-            with open(f_name, "w") as f:
+            with open(f_name, "w", encoding="utf8") as f:
                 f.write("")
-        with open(f_name, 'a') as f:
+        with open(f_name, 'a', encoding="utf8") as f:
             f.write("\n" + new_forica)
             
+        embed = discord.Embed(title="", description=f"Dodata forica: {new_forica}", color=discord.Color.green())
+        return await ctx.send(embed=embed)
+            
+    @commands.command(name="maltret", aliases=['mt'], description="Maltret user")
+    async def maltret(self, ctx, *, nick: str):
+        
+        member = discord.utils.get(ctx.guild.members, display_name=nick)
+        if member is None:
+            embed = discord.Embed(title="", description=f"Ne postoji korisnik sa imenom {nick}", color=discord.Color.green())
+            return await ctx.send(embed=embed)
+        channels = ctx.guild.voice_channels
+        if len(channels) < 3:
+            embed = discord.Embed(title="", description=f"Nema dovoljno kanala.", color=discord.Color.green())
+            return await ctx.send(embed=embed)
+            
+        ch_1 = member.voice.channel
+        ch_2 = member.voice.channel
+        ch_3 = member.voice.channel
+        while(ch_1 == ch_2 or ch_1 == ch_3 or ch_2 == ch_3):
+            ch_2 = channels[random.randrange(len(channels))]
+            ch_3 = channels[random.randrange(len(channels))]
+        
+        times = 4
+        await self.maltret_member(member, ch_1, ch_2, ch_3, times=times)
+        
+        return
+
+            
+     
 
     @commands.command(name='resume', description="resumes music")
     async def resume_(self, ctx):
@@ -595,12 +629,15 @@ class Music(commands.Cog):
         return sound_with_altered_frame_rate.set_frame_rate(sound.frame_rate)
 
     def generate_welcome_message(self, name, guild_name):
-        f_name = f"forice/{guild_name}.csv"
+        # f_name = f"forice/{guild_name}.csv"
+        f_name = os.path.join("forice", str(guild_name) + ".csv")
+        f_name_json = os.path.join("forice", str(guild_name) + ".json")
+        # print("EXIST? ", f_name, os.path.exists(f_name))
         message_start = f"Zdravo {name},"
         message = ""
         try:
             if os.path.exists(f_name):        
-                with open(f_name, "r") as f:
+                with open(f_name, "r", encoding="utf8") as f:
                     reader = csv.reader(f,delimiter='-')
                     forice = list(reader)
                     message = forice[random.randint(0,len(forice) - 1)][0]
@@ -609,3 +646,9 @@ class Music(commands.Cog):
             message = ""
         print("Generisan message: ", message)
         return  message_start + message
+
+    async def maltret_member(self, member, ch_1, ch_2, ch_3, times):
+        for i in range(times):
+            await member.move_to(ch_2)
+            await member.move_to(ch_3)
+        await member.move_to(ch_1)

@@ -17,7 +17,7 @@ youtube_dl.utils.bug_reports_message = lambda: ''
 
 client = commands.Bot(command_prefix='$')
 
-TOKEN = "OTUzMDk3OTg5MDE3MTk0NTI2.Yi_nrA.J3hba2z1YnHPomWRMNnSoTTRAfc"
+TOKEN = "OTUzMDk3OTg5MDE3MTk0NTI2.Yi_nrA.hfUAVwc-pLy7ZR_3KMxa_XVZ3EA"
 
 players = {}
 ytdlopts = {
