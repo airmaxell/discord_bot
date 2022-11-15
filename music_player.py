@@ -359,8 +359,7 @@ class Music(commands.Cog):
         # If download is False, source will be a dict which will be used later to regather the stream.
         # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
         if text_to_speech == "maxa":
-            source = FFmpegPCMAudio('maxa.mp3', ffmpegopts)
-            await player.play_static(source)
+            await player.play_static(FFmpegOpusAudio('maxa.mp3', bitrate=256))
         
         elif text_to_speech == "lol":
             myobj = gTTS(text="lolovi dronovi speed bollovi", lang='sr', slow=False)
