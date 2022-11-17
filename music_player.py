@@ -362,7 +362,7 @@ class Music(commands.Cog):
             await player.play_static(FFmpegOpusAudio('maxa.mp3', bitrate=256))
         
         elif text_to_speech == "lol":
-            myobj = gTTS(text="lolovi dronovi speed bollovi", lang='sr', slow=False)
+            myobj = gTTS(text="lolovi dronovi speed bollovi", lang='sr', slow=False, tld="com")
             # f_name = f"tts/{ctx.message.guild}.mp3"
             f_name = os.path.join("tts", str(ctx.message.guild) + ".mp3")
             myobj.save(f_name)
