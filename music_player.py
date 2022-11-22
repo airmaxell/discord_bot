@@ -328,7 +328,7 @@ class Music(commands.Cog):
     @commands.command(name="maltret", aliases=['mt'], description="Maltret user")
     async def maltret(self, ctx, *, user: discord.User):
         
-        member = discord.utils.get(ctx.guild.members, display_name=user.display_name)
+        member = discord.utils.get(ctx.guild.members, id=user.id)
         if member is None:
             embed = discord.Embed(title="", description=f"Ne postoji korisnik sa imenom {user}", color=discord.Color.green())
             return await ctx.send(embed=embed)
