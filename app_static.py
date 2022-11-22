@@ -15,5 +15,5 @@ client.add_cog(Music(client))
 async def on_ready():
     print('We have logged in ad {0.user}'.format(client))
 
-TOKEN = "OTUzMDk3OTg5MDE3MTk0NTI2.G9ZPFc.qj-0_CT2IrXiCI2a_R-r7NtCFe-Yc4J5KCDmCk"
+TOKEN = "OTUzMDk3OTg5MDE3MTk0NTI2.GA8pnl.YZke2tlON1HDO7Bgi0kiVL2FaJUzTkSBzbpZSo"
 client.run(TOKEN)

@@ -23,79 +23,10 @@ ffmpegopts = {
     'before_options': '-nostdin',
     'options': '-vn'
 }
-# Suppress noise about console usage from errors
-youtube_dl.utils.bug_reports_message = lambda: ''
-
-ytdlopts = {
-    'format': 'bestaudio/best',
-    'outtmpl': 'downloads/%(extractor)s-%(id)s-%(title)s.%(ext)s',
-    'restrictfilenames': True,
-    'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
-    'default_search': 'auto',
-    'source_address': '0.0.0.0'  # ipv6 addresses cause issues sometimes
-}
 
 
-ytdl = YoutubeDL(ytdlopts)
 
 players = {}
-
-class YTDLSource(discord.PCMVolumeTransformer):
-
-    def __init__(self, source, *, data, requester):
-        super().__init__(source)
-        self.requester = requester
-
-        self.title = data.get('title')
-        self.web_url = data.get('webpage_url')
-        self.duration = data.get('duration')
-
-        # YTDL info dicts (data) have other useful information you might want
-        # https://github.com/rg3/youtube-dl/blob/master/README.md
-
-    def __getitem__(self, item: str):
-        """Allows us to access attributes similar to a dict.
-        This is only useful when you are NOT downloading.
-        """
-        return self.__getattribute__(item)
-
-    @classmethod
-    async def create_source(cls, ctx, search: str, *, loop, download=False):
-        loop = loop or asyncio.get_event_loop()
-
-        to_run = partial(ytdl.extract_info, url=search, download=download)
-        data = await loop.run_in_executor(None, to_run)
-
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
-
-        embed = discord.Embed(title="", description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=discord.Color.green())
-        await ctx.send(embed=embed)
-
-        if download:
-            source = ytdl.prepare_filename(data)
-        else:
-            return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
-
-        return cls(discord.FFmpegPCMAudio(source), data=data, requester=ctx.author)
-
-    @classmethod
-    async def regather_stream(cls, data, *, loop):
-        """Used for preparing a stream, instead of downloading.
-        Since Youtube Streaming links expire."""
-        loop = loop or asyncio.get_event_loop()
-        requester = data['requester']
-
-        to_run = partial(ytdl.extract_info, url=data['webpage_url'], download=False)
-        data = await loop.run_in_executor(None, to_run)
-
-        return cls(discord.FFmpegPCMAudio(data['url']), data=data, requester=requester)
 
 
 class MusicPlayer:
@@ -181,24 +112,6 @@ class Music(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.random_questions = [
-            'jesi li drkao pišicu danas?',
-            'da li si svestan koliko si loš u kanteru?',
-            'šta ti je sa rukama? Zašto ih nemaš?',
-            'izađi sa diskorda mnogo si ružan.',
-            'da li si oprao zube?',
-            'da li se gušiš dok ga pušiš?',
-            'da li ti se puši kurac dok se tuširaš?',
-            'da li još uvek drkaš sa dva prsta?',
-            'da li si priznao svojim drugarima da si homić?',
-            'uvalim ti veliki.',
-            'sve najgore ti želim.',
-            'uvalim ti 7 centimetra tvrde kurčine.',
-            'jebeš li šta i zašto ništa?',
-            'jel možeš da prdneš dok ti je unutra?',
-            'lep si kao Mira Škorić.',
-            'uvalim ti malo.'
-        ]
         self.players = {}
 
     async def cleanup(self, guild):
@@ -413,11 +326,11 @@ class Music(commands.Cog):
         return await ctx.send(embed=embed)
             
     @commands.command(name="maltret", aliases=['mt'], description="Maltret user")
-    async def maltret(self, ctx, *, nick: str):
+    async def maltret(self, ctx, *, user: discord.User):
         
-        member = discord.utils.get(ctx.guild.members, display_name=nick)
+        member = discord.utils.get(ctx.guild.members, display_name=user.display_name)
         if member is None:
-            embed = discord.Embed(title="", description=f"Ne postoji korisnik sa imenom {nick}", color=discord.Color.green())
+            embed = discord.Embed(title="", description=f"Ne postoji korisnik sa imenom {user}", color=discord.Color.green())
             return await ctx.send(embed=embed)
         channels = ctx.guild.voice_channels
         if len(channels) < 3:
