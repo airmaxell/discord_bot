@@ -274,6 +274,9 @@ class Music(commands.Cog):
         if text_to_speech == "maxa":
             await player.play_static(FFmpegOpusAudio('maxa.mp3', bitrate=256))
         
+        elif text_to_speech == "cao":
+            await player.play_static(FFmpegOpusAudio('cao_maxo.mp3', bitrate=256))
+
         elif text_to_speech == "lol":
             myobj = gTTS(text="lolovi dronovi speed bollovi", lang='sr', slow=False, tld="com")
             # f_name = f"tts/{ctx.message.guild}.mp3"
